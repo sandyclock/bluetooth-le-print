@@ -185,6 +185,7 @@ export interface WriteOptions {
    * web: DataView
    */
   value: Data;
+  usePrinterSocket?: boolean;
 }
 
 export interface WriteDescriptorOptions {

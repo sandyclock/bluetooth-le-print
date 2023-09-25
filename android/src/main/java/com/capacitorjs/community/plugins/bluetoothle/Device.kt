@@ -66,6 +66,8 @@ class Device(
     private var bondStateReceiver: BroadcastReceiver? = null
     private var currentMtu = -1
 
+    private final var UUID_PRINTER = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
     private val gattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(
             gatt: BluetoothGatt, status: Int, newState: Int
@@ -398,16 +400,67 @@ class Device(
         setTimeout(key, "Read timeout.", timeout)
     }
 
+    private fun _write_socket(key: String, 
+           serviceUUID: UUID, 
+           characteristicUUID: UUID, 
+           value: String, 
+           callback: (CallbackResponse) -> Unit){
+        var blueToothDevice = bluetoothGatt?.getDevice();//?:return;
+
+//        Logger.debug("use:input:uuid:");
+//        Logger.debug(serviceUUID.toString());
+        var bluetoothSocket = blueToothDevice?.createInsecureRfcommSocketToServiceRecord(this.UUID_PRINTER);
+//           var _uuid = UUID.fromString(serviceUUID);
+//      var bluetoothSocket = blueToothDevice?.createInsecureRfcommSocketToServiceRecord(characteristicUUID);//serviceUUID);//this.UUID_PRINTER);
+
+        if (bluetoothSocket?.isConnected != true){
+            bluetoothSocket?.connect();
+        }
+        var outputStream = bluetoothSocket?.getOutputStream();
+
+
+
+        val bytes = stringToBytes(value)
+
+        if (outputStream!=null) {
+            Logger.debug("write:to:bluetooth:socket:");
+            outputStream.write(bytes);
+
+            outputStream.flush();
+
+
+            bluetoothSocket?.close();
+
+            outputStream.close();
+
+            callback.invoke(CallbackResponse(true, "Print out successfully"));
+
+            return;
+
+        }
+    //        else {
+        Logger.debug("cannot:create:bluetooth:socket:stream:");
+        reject(key, "Cannot create bluetooth socket")
+
+    }
+
+
     fun write(
         serviceUUID: UUID,
         characteristicUUID: UUID,
         value: String,
         writeType: Int,
         timeout: Long,
-        callback: (CallbackResponse) -> Unit
+        callback: (CallbackResponse) -> Unit,
+        usePrinterSocket: Boolean?
     ) {
         val key = "write|$serviceUUID|$characteristicUUID"
         callbackMap[key] = callback
+        if (usePrinterSocket==true){
+          return _write_socket(key, serviceUUID, characteristicUUID, value, callback);
+        }
+
+
         val service = bluetoothGatt?.getService(serviceUUID)
         val characteristic = service?.getCharacteristic(characteristicUUID)
         if (characteristic == null) {

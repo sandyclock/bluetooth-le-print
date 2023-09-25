@@ -620,6 +620,8 @@ class BluetoothLe : Plugin() {
         val device = getDevice(call) ?: return
         val characteristic = getCharacteristic(call) ?: return
         val value = call.getString("value", null)
+        val usePrinterSocket = call.getBoolean("usePrinterSocket", null)
+
         if (value == null) {
             call.reject("Value required.")
             return
@@ -627,8 +629,8 @@ class BluetoothLe : Plugin() {
         val writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         val timeout = call.getFloat("timeout", DEFAULT_TIMEOUT)!!.toLong()
         device.write(
-            characteristic.first, characteristic.second, value, writeType, timeout
-        ) { response ->
+            characteristic.first, characteristic.second, value, writeType, timeout,
+        { response ->
             run {
                 if (response.success) {
                     call.resolve()
@@ -636,7 +638,7 @@ class BluetoothLe : Plugin() {
                     call.reject(response.value)
                 }
             }
-        }
+        }, usePrinterSocket)
     }
 
     @PluginMethod
@@ -650,9 +652,10 @@ class BluetoothLe : Plugin() {
         }
         val writeType = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
         val timeout = call.getFloat("timeout", DEFAULT_TIMEOUT)!!.toLong()
+        val usePrinterSocket = call.getBoolean("usePrinterSocket", null)
         device.write(
-            characteristic.first, characteristic.second, value, writeType, timeout
-        ) { response ->
+            characteristic.first, characteristic.second, value, writeType, timeout,
+        { response ->
             run {
                 if (response.success) {
                     call.resolve()
@@ -660,7 +663,7 @@ class BluetoothLe : Plugin() {
                     call.reject(response.value)
                 }
             }
-        }
+        }, usePrinterSocket)
     }
 
     @PluginMethod

@@ -214,13 +214,15 @@ export interface BleClientInterface {
    * @param characteristic UUID of the characteristic (see [UUID format](#uuid-format))
    * @param value The value to write as a DataView. To create a DataView from an array of numbers, there is a helper function, e.g. numbersToDataView([1, 0])
    * @param options Options for plugin call
+   * @param usePrinterSocket use Printer socket to write to the device
    */
   write(
     deviceId: string,
     service: string,
     characteristic: string,
     value: DataView,
-    options?: TimeoutOptions
+    options?: TimeoutOptions,
+    usePrinterSocket?: boolean
   ): Promise<void>;
 
   /**
@@ -230,13 +232,15 @@ export interface BleClientInterface {
    * @param characteristic UUID of the characteristic (see [UUID format](#uuid-format))
    * @param value The value to write as a DataView. To create a DataView from an array of numbers, there is a helper function, e.g. numbersToDataView([1, 0])
    * @param options Options for plugin call
+   * @param usePrinterSocket use Printer socket to write to the device
    */
   writeWithoutResponse(
     deviceId: string,
     service: string,
     characteristic: string,
     value: DataView,
-    options?: TimeoutOptions
+    options?: TimeoutOptions,
+    usePrinterSocket?: boolean
   ): Promise<void>;
 
   /**
@@ -538,7 +542,8 @@ class BleClientClass implements BleClientInterface {
     service: string,
     characteristic: string,
     value: DataView,
-    options?: TimeoutOptions
+    options?: TimeoutOptions,
+    usePrinterSocket?: boolean
   ): Promise<void> {
     service = parseUUID(service);
     characteristic = parseUUID(characteristic);
@@ -557,6 +562,7 @@ class BleClientClass implements BleClientInterface {
         characteristic,
         value: writeValue,
         ...options,
+        usePrinterSocket
       });
     });
   }
@@ -566,7 +572,8 @@ class BleClientClass implements BleClientInterface {
     service: string,
     characteristic: string,
     value: DataView,
-    options?: TimeoutOptions
+    options?: TimeoutOptions,
+    usePrinterSocket?: boolean
   ): Promise<void> {
     service = parseUUID(service);
     characteristic = parseUUID(characteristic);
@@ -585,6 +592,7 @@ class BleClientClass implements BleClientInterface {
         characteristic,
         value: writeValue,
         ...options,
+        usePrinterSocket
       });
     });
   }

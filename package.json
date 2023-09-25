@@ -1,6 +1,6 @@
 {
-  "name": "@capacitor-community/bluetooth-le",
-  "version": "3.0.1",
+  "name": "capacitor-bluetooth-le-print",
+  "version": "3.0.6",
   "description": "Capacitor plugin for Bluetooth Low Energy ",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -66,7 +66,7 @@
     "android/build.gradle",
     "dist/",
     "ios/Plugin/",
-    "CapacitorCommunityBluetoothLe.podspec"
+    "CapacitorBluetoothLePrint.podspec"
   ],
   "keywords": [
     "capacitor",
