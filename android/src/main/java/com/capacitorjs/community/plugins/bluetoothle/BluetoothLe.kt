@@ -1,7 +1,10 @@
 package com.capacitorjs.community.plugins.bluetoothle
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
@@ -22,6 +25,7 @@ import android.os.ParcelUuid
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
 import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+import androidx.activity.result.ActivityResult
 import androidx.core.location.LocationManagerCompat
 import com.getcapacitor.JSArray
 import com.getcapacitor.JSObject
@@ -30,12 +34,14 @@ import com.getcapacitor.PermissionState
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
+import com.getcapacitor.annotation.ActivityCallback
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.annotation.Permission
 import com.getcapacitor.annotation.PermissionCallback
 import java.util.UUID
 
 
+@SuppressLint("MissingPermission")
 @CapacitorPlugin(
     name = "BluetoothLe",
     permissions = [
@@ -96,8 +102,7 @@ class BluetoothLe : Plugin() {
 
     @PluginMethod
     fun initialize(call: PluginCall) {
-        // Build.VERSION_CODES.S = 31
-        if (Build.VERSION.SDK_INT >= 31) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val neverForLocation = call.getBoolean("androidNeverForLocation", false) as Boolean
             aliases = if (neverForLocation) {
                 arrayOf(
@@ -158,6 +163,22 @@ class BluetoothLe : Plugin() {
         val result = JSObject()
         result.put("value", enabled)
         call.resolve(result)
+    }
+
+    @PluginMethod
+    fun requestEnable(call: PluginCall) {
+        assertBluetoothAdapter(call) ?: return
+        val intent = Intent(ACTION_REQUEST_ENABLE)
+        startActivityForResult(call, intent, "handleRequestEnableResult")
+    }
+
+    @ActivityCallback
+    private fun handleRequestEnableResult(call: PluginCall, result: ActivityResult) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            call.resolve()
+        } else {
+            call.reject("requestEnable failed.")
+        }
     }
 
     @PluginMethod
@@ -439,7 +460,8 @@ class BluetoothLe : Plugin() {
     @PluginMethod
     fun createBond(call: PluginCall) {
         val device = getOrCreateDevice(call) ?: return
-        device.createBond { response ->
+        val timeout = call.getFloat("timeout", DEFAULT_TIMEOUT)!!.toLong()
+        device.createBond(timeout) { response ->
             run {
                 if (response.success) {
                     call.resolve()

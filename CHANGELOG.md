@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.0...v3.1.1) (2023-11-05)
+
+
+### Bug Fixes
+
+* **android:** handle requestEnable result ([#595](https://github.com/capacitor-community/bluetooth-le/issues/595)) ([f9cf627](https://github.com/capacitor-community/bluetooth-le/commit/f9cf62714f76621ce8ddd794ece0432fa7e3673f))
+
+## [3.1.0](https://github.com/capacitor-community/bluetooth-le/compare/v3.0.2...v3.1.0) (2023-11-02)
+
+
+### Features
+
+* **android:** add requestEnable method ([#591](https://github.com/capacitor-community/bluetooth-le/issues/591)) ([79c5742](https://github.com/capacitor-community/bluetooth-le/commit/79c5742d58865bdd7524a1c55cccfd97dd0c1aca))
+
+
+### Bug Fixes
+
+* **ios:** fix multiple instances of same device object during ble scan ([#589](https://github.com/capacitor-community/bluetooth-le/issues/589)) ([b5219ad](https://github.com/capacitor-community/bluetooth-le/commit/b5219adf15566c31d0b53112f5878cb0018c11e7))
+
+### [3.0.2](https://github.com/capacitor-community/bluetooth-le/compare/v3.0.1...v3.0.2) (2023-10-03)
+
+
+### Bug Fixes
+
+* **android:** added timeout on Device#createBond ([#573](https://github.com/capacitor-community/bluetooth-le/issues/573)) ([48f664f](https://github.com/capacitor-community/bluetooth-le/commit/48f664fc42e0cbf666abc5b3fb27a0e6fea8fa72))
+* **android:** use new methods from API level 33 ([9798e0f](https://github.com/capacitor-community/bluetooth-le/commit/9798e0f68b5c3c2416ebff36545c6f1d0665b31c))
+* **android:** use new writeCharacteristic method for API Level >= 33 ([#562](https://github.com/capacitor-community/bluetooth-le/issues/562)) ([cb74440](https://github.com/capacitor-community/bluetooth-le/commit/cb74440fd0d9963f9a388f7c876224e9bf520595))
+
 ### [3.0.1](https://github.com/capacitor-community/bluetooth-le/compare/v3.0.0...v3.0.1) (2023-08-14)
 
 

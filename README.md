@@ -6,14 +6,14 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/maintenance/yes/2023?style=flat-square" />
+  <img src="https://img.shields.io/maintenance/yes/2024?style=flat-square" />
   <a href="https://github.com/capacitor-community/bluetooth-le/actions?query=workflow%3A%22CI%22"><img src="https://img.shields.io/github/actions/workflow/status/capacitor-community/bluetooth-le/main.yml?branch=main&style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/@capacitor-community/bluetooth-le"><img src="https://img.shields.io/npm/l/@capacitor-community/bluetooth-le?style=flat-square" /></a>
 <br>
   <a href="https://www.npmjs.com/package/@capacitor-community/bluetooth-le"><img src="https://img.shields.io/npm/dw/@capacitor-community/bluetooth-le?style=flat-square" /></a>
   <a href="https://www.npmjs.com/package/@capacitor-community/bluetooth-le"><img src="https://img.shields.io/npm/v/@capacitor-community/bluetooth-le?style=flat-square" /></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img src="https://img.shields.io/badge/all%20contributors-11-orange?style=flat-square" /></a>
+<a href="#contributors-"><img src="https://img.shields.io/badge/all%20contributors-14-orange?style=flat-square" /></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
 
@@ -38,7 +38,9 @@ This is a Capacitor plugin for Bluetooth Low Energy. It supports the web, Androi
 
 The goal is to support the same features on all platforms. Therefore the [Web Bluetooth API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API) is taken as a guidline for what features to implement.
 
-This plugin only supports the central role of the Bluetooth Low Energy protocol. If you need the peripheral role, take a look a these plugins:
+This plugin only supports Bluetooth **Low Energy**, not Bluetooth serial / classic.
+
+Furthermore the plugin only supports the central role of the Bluetooth Low Energy protocol. If you need the peripheral role, take a look a these plugins:
 
 - https://github.com/randdusing/cordova-plugin-bluetoothle
 - https://github.com/don/cordova-plugin-ble-peripheral
@@ -51,6 +53,7 @@ Below is an index of all the methods available.
 
 - [`initialize(...)`](#initialize)
 - [`isEnabled()`](#isenabled)
+- [`requestEnable()`](#requestenable)
 - [`enable()`](#enable)
 - [`disable()`](#disable)
 - [`startEnabledNotifications(...)`](#startenablednotifications)
@@ -126,7 +129,7 @@ If the app needs to use Bluetooth while it is in the background, you also have t
 
 ### Android
 
-On Android, no further steps are required to use the plugin (if you are using Capacitor 2, see [here](https://github.com/capacitor-community/bluetooth-le/blob/0.x/README.md#android)).
+On Android, no further steps are required to use the plugin.
 
 #### (Optional) Android 12 Bluetooth permissions
 
@@ -135,8 +138,6 @@ If your app targets Android 12 (API level 31) or higher and your app doesn't use
 The following steps are required to scan for Bluetooth devices without location permission on Android 12 devices:
 
 - In `android/variables.gradle`, make sure `compileSdkVersion` and `targetSdkVersion` are at least 31 (changing those values can have other consequences on your app, so make sure you know what you're doing).
-- Make sure you have JDK 11+ (it is recommended to use JDK that comes with Android Studio).
-- In `android/app/src/main/AndroidManifest.xml`, add `android:exported="true"` to your activity if not already added (setting [`android:exported`](https://developer.android.com/guide/topics/manifest/activity-element#exported) is required in apps targeting Android 12 and higher).
 - In `android/app/src/main/AndroidManifest.xml`, update the permissions:
   ```diff
       <!-- Permissions -->
@@ -197,15 +198,16 @@ The display strings can also be set at run-time using [`setDisplayStrings(...)`]
 
 ## Usage
 
-It is recommended to not use the plugin class directly. There is a wrapper class `BleClient` which makes events and method arguments easier to work with.
+There is a plugin wrapper class `BleClient` which makes events and method arguments easier to work with.
 
 ```typescript
-// Import the wrapper class directly
+// Import the wrapper class
 import { BleClient } from '@capacitor-community/bluetooth-le';
-
-// DO NOT use this
-import { BluetoothLe } from '@capacitor-community/bluetooth-le';
 ```
+
+**Note**: It is not recommended to use the `BluetoothLe` plugin class directly.
+
+### Heart rate monitor
 
 Here is an example of how to use the plugin. It shows how to read the heart rate from a BLE heart rate monitor such as the Polar H10.
 
@@ -279,7 +281,9 @@ function parseHeartRate(value: DataView): number {
 }
 ```
 
-An example of using the scanning API:
+### Scanning API
+
+Here is an example of using the scanning API.
 
 ```typescript
 import { BleClient, numberToUUID } from '@capacitor-community/bluetooth-le';
@@ -323,6 +327,7 @@ _Note_: web support depends on the browser, see [implementation status](https://
 | -------------------------------------------------------------- | :-----: | :-: | :-: |
 | [`initialize()`](#initialize)                                  |   ✅    | ✅  | ✅  |
 | [`isEnabled()`](#isenabled)                                    |   ✅    | ✅  | --  |
+| [`requestEnable()`](#requestEnable)                            |   ✅    | ❌  | ❌  |
 | [`enable()`](#enable)                                          |   ✅    | ❌  | ❌  |
 | [`disable()`](#disable)                                        |   ✅    | ❌  | ❌  |
 | [`startEnabledNotifications(...)`](#startenablednotifications) |   ✅    | ✅  | --  |
@@ -395,6 +400,17 @@ Always returns `true` on **web**.
 
 ---
 
+### requestEnable()
+
+```typescript
+requestEnable() => Promise<void>
+```
+
+Request enabling Bluetooth. Show a system activity that allows the user to turn on Bluetooth. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#ACTION_REQUEST_ENABLE
+Only available on **Android**.
+
+---
+
 ### enable()
 
 ```typescript
@@ -403,7 +419,7 @@ enable() => Promise<void>
 
 Enable Bluetooth.
 Only available on **Android**.
-_deprecated_ See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#enable()
+**Deprecated** Will fail on Android SDK &gt;= 33. Use `requestEnable` instead. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#enable()
 
 ---
 
@@ -415,7 +431,7 @@ disable() => Promise<void>
 
 Disable Bluetooth.
 Only available on **Android**.
-_deprecated_ See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#disable()
+**Deprecated** Will fail on Android SDK &gt;= 33. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#disable()
 
 ---
 
@@ -608,15 +624,16 @@ Connect to a peripheral BLE device. For an example, see [usage](#usage).
 ### createBond(...)
 
 ```typescript
-createBond(deviceId: string) => Promise<void>
+createBond(deviceId: string, options?: TimeoutOptions | undefined) => Promise<void>
 ```
 
 Create a bond with a peripheral BLE device.
 Only available on **Android**. On iOS bonding is handled by the OS.
 
-| Param          | Type                | Description                                                                                                    |
-| -------------- | ------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **`deviceId`** | <code>string</code> | The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan)) |
+| Param          | Type                                                      | Description                                                                                                    |
+| -------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **`deviceId`** | <code>string</code>                                       | The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan)) |
+| **`options`**  | <code><a href="#timeoutoptions">TimeoutOptions</a></code> | Options for plugin call                                                                                        |
 
 ---
 
@@ -1048,6 +1065,23 @@ await BleClient.disconnect(device.deviceId);
 await BleClient.connect(device.deviceId);
 ```
 
+#### No devices found on Android
+
+On Android, the `initialize` call requests the location permission. However, if location services are disable on the OS level, the app will not find any devices. You can check if the location is enabled and open the settings when not.
+
+```typescript
+async function initialize() {
+  // Check if location is enabled
+  if (this.platform.is('android')) {
+    const isLocationEnabled = await BleClient.isLocationEnabled();
+    if (!isLocationEnabled) {
+      await BleClient.openLocationSettings();
+    }
+  }
+  await BleClient.initialize();
+}
+```
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -1071,6 +1105,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/aadito123"><img src="https://avatars.githubusercontent.com/u/63646058?v=4?s=100" width="100px;" alt="Aadit Olkar"/><br /><sub><b>Aadit Olkar</b></sub></a><br /><a href="https://github.com/capacitor-community/bluetooth-le/commits?author=aadito123" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/y3nd"><img src="https://avatars.githubusercontent.com/u/18102153?v=4?s=100" width="100px;" alt="Yoann N."/><br /><sub><b>Yoann N.</b></sub></a><br /><a href="https://github.com/capacitor-community/bluetooth-le/commits?author=y3nd" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Andy3189"><img src="https://avatars.githubusercontent.com/u/2084016?v=4?s=100" width="100px;" alt="Andy3189"/><br /><sub><b>Andy3189</b></sub></a><br /><a href="https://github.com/capacitor-community/bluetooth-le/commits?author=Andy3189" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/RFM69CW"><img src="https://avatars.githubusercontent.com/u/20404734?v=4?s=100" width="100px;" alt="Sammy"/><br /><sub><b>Sammy</b></sub></a><br /><a href="https://github.com/capacitor-community/bluetooth-le/commits?author=RFM69CW" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/td-tomasz-joniec"><img src="https://avatars.githubusercontent.com/u/109506928?v=4?s=100" width="100px;" alt="td-tomasz-joniec"/><br /><sub><b>td-tomasz-joniec</b></sub></a><br /><a href="https://github.com/capacitor-community/bluetooth-le/commits?author=td-tomasz-joniec" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://fanxj.com"><img src="https://avatars.githubusercontent.com/u/10436013?v=4?s=100" width="100px;" alt="Michele Ferrari"/><br /><sub><b>Michele Ferrari</b></sub></a><br /><a href="https://github.com/capacitor-community/bluetooth-le/commits?author=micheleypf" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

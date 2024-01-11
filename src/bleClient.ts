@@ -34,18 +34,23 @@ export interface BleClientInterface {
   isEnabled(): Promise<boolean>;
 
   /**
+   * Request enabling Bluetooth. Show a system activity that allows the user to turn on Bluetooth. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#ACTION_REQUEST_ENABLE
+   * Only available on **Android**.*/
+  requestEnable(): Promise<void>;
+
+  /**
    * Enable Bluetooth.
    * Only available on **Android**.
-   * *deprecated* See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#enable()
-   * @deprecated See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#enable()
+   * **Deprecated** Will fail on Android SDK >= 33. Use `requestEnable` instead. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#enable()
+   * @deprecated Will fail on Android SDK >= 33. Use `requestEnable` instead. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#enable()
    */
   enable(): Promise<void>;
 
   /**
    * Disable Bluetooth.
    * Only available on **Android**.
-   * *deprecated* See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#disable()
-   * @deprecated See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#disable()
+   * **Deprecated** Will fail on Android SDK >= 33. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#disable()
+   * @deprecated Will fail on Android SDK >= 33. See https://developer.android.com/reference/android/bluetooth/BluetoothAdapter#disable()
    */
   disable(): Promise<void>;
 
@@ -145,8 +150,9 @@ export interface BleClientInterface {
    * Create a bond with a peripheral BLE device.
    * Only available on **Android**. On iOS bonding is handled by the OS.
    * @param deviceId  The ID of the device to use (obtained from [requestDevice](#requestDevice) or [requestLEScan](#requestLEScan))
+   * @param options Options for plugin call
    */
-  createBond(deviceId: string): Promise<void>;
+  createBond(deviceId: string, options?: TimeoutOptions): Promise<void>;
 
   /**
    * Report whether a peripheral BLE device is bonded.
@@ -330,6 +336,12 @@ class BleClientClass implements BleClientInterface {
     return enabled;
   }
 
+  async requestEnable(): Promise<void> {
+    await this.queue(async () => {
+      await BluetoothLe.requestEnable();
+    });
+  }
+
   async enable(): Promise<void> {
     await this.queue(async () => {
       await BluetoothLe.enable();
@@ -466,9 +478,9 @@ class BleClientClass implements BleClientInterface {
     });
   }
 
-  async createBond(deviceId: string): Promise<void> {
+  async createBond(deviceId: string, options?: TimeoutOptions): Promise<void> {
     await this.queue(async () => {
-      await BluetoothLe.createBond({ deviceId });
+      await BluetoothLe.createBond({ deviceId, ...options });
     });
   }
 
