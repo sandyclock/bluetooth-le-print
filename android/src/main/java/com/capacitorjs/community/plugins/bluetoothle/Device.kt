@@ -54,6 +54,93 @@ class Device(
     private val address: String,
     private val onDisconnect: () -> Unit
 ) {
+    private var reliableWriteBuffer: ReliableWriteBuffer?=null;
+
+    inner class ReliableWriteBuffer(private val bytes: ByteArray,
+                                    private val timeout: Long,
+                                    callback: (CallbackResponse) -> Unit,
+                                    private val writeType: Int,
+                                    private val characteristic: BluetoothGattCharacteristic) {
+      private val _mtu = computeMtu();
+      init {
+          // assign this buffer to the device.
+          reliableWriteBuffer = this;
+
+          //In case of success or failure, check whether the buffer is still assigned
+          // and if so, teardown or abort.
+          val _callback: (CallbackResponse)->Unit = fun (_in){
+            if (_in.success == true){
+              reliableWriteBuffer?.tearDown();
+            }
+            else {
+              reliableWriteBuffer?.abort();
+            };
+            callback(_in);
+          }
+
+        // register call back and set up time out.
+        callbackMap[RELIABLE_WRITE_KEY] = _callback;
+        setTimeout(RELIABLE_WRITE_KEY, "Chunk write timeout.", timeout);
+      }
+      private var _bytesSent: Int =0;
+      private fun next(): ByteArray? {
+        if (_bytesSent>=bytes.size){
+          return null
+        }
+        val startIdx = _bytesSent;
+        _bytesSent = startIdx+_mtu;
+        if (_bytesSent>bytes.size){
+          _bytesSent = bytes.size;
+        }
+        return bytes.copyOfRange(startIdx, _bytesSent);
+      }
+
+      fun hasNext(): Boolean {
+        return _bytesSent<bytes.size;
+      }
+
+      fun writeNextChunk() {
+        val _bytes_chunk = this.next();
+        if (_bytes_chunk!=null) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val statusCode = bluetoothGatt?.writeCharacteristic(characteristic, _bytes_chunk, writeType)
+            if (statusCode != BluetoothStatusCodes.SUCCESS) {
+              reject(RELIABLE_WRITE_KEY, "Chunk writing characteristic failed with status code $statusCode.")
+              return;
+            }
+          } else {
+            characteristic.value = _bytes_chunk;
+            characteristic.writeType = writeType;
+            val result = bluetoothGatt?.writeCharacteristic(characteristic)
+            if (result != true) {
+              reject(RELIABLE_WRITE_KEY, "Writing characteristic failed.")
+              return;
+            }
+          }
+          return;
+        }
+        //we need to execute the write.
+        if (bluetoothGatt?.executeReliableWrite() != true){
+          reject(RELIABLE_WRITE_KEY, "Cannot execute chunk write.");
+          return;
+        }
+      }
+
+      fun tearDown() {
+        if (reliableWriteBuffer == this){
+            reliableWriteBuffer = null;
+        }
+      }
+
+      private fun abort(){
+          if (reliableWriteBuffer == this){
+            reliableWriteBuffer = null;
+            bluetoothGatt?.abortReliableWrite();
+          }
+      }
+
+    }
+
     companion object {
         private val TAG = Device::class.java.simpleName
         private const val STATE_DISCONNECTED = 0
@@ -61,6 +148,8 @@ class Device(
         private const val STATE_CONNECTED = 2
         private const val CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb"
         private const val REQUEST_MTU = 512
+        private const val DEFAULT_MTU = 20
+        private const val RELIABLE_WRITE_KEY = "reliable|write"
     }
 
     private var connectionState = STATE_DISCONNECTED
@@ -176,6 +265,16 @@ class Device(
             gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int
         ) {
             super.onCharacteristicWrite(gatt, characteristic, status)
+
+            if (reliableWriteBuffer!=null){
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                  resolve(RELIABLE_WRITE_KEY, "Cannot write chunk data.");
+                  return;
+                }
+                reliableWriteBuffer?.writeNextChunk();
+                return;
+            }
+
             val key = "write|${characteristic.service.uuid}|${characteristic.uuid}"
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 resolve(key, "Characteristic successfully written.")
@@ -184,6 +283,22 @@ class Device(
             }
 
         }
+
+        override fun onReliableWriteCompleted(gatt: BluetoothGatt?, status: Int) {
+          super.onReliableWriteCompleted(gatt, status);
+          Logger.debug("************* on Reliable Write Completed ************")
+          Logger.debug(status.toString());
+
+          reliableWriteBuffer?.tearDown();
+
+          if (status == BluetoothGatt.GATT_SUCCESS) {
+            resolve(RELIABLE_WRITE_KEY, "Characteristic successfully written in chunk.")
+          } else {
+            reject(RELIABLE_WRITE_KEY, "Chunk writing characteristic failed.")
+          }
+
+        }
+
 
         @TargetApi(Build.VERSION_CODES.S_V2)
         override fun onCharacteristicChanged(
@@ -320,6 +435,13 @@ class Device(
 
     fun getMtu(): Int {
         return currentMtu
+    }
+
+    private fun computeMtu(): Int {
+        if (this.currentMtu>0){
+          return this.currentMtu;
+        }
+        return DEFAULT_MTU
     }
 
     fun requestConnectionPriority(connectionPriority: Int): Boolean {
@@ -520,6 +642,23 @@ class Device(
 
     }
 
+    private fun _start_reliable_write(
+      characteristic: BluetoothGattCharacteristic,
+                                      callback: (CallbackResponse) -> Unit,
+                                      _bytes: ByteArray,
+                                      _writeType: Int,
+                                      _timeout: Long
+                                      ){
+
+      var status = bluetoothGatt?.beginReliableWrite();
+      if (status != true){
+        callbackMap[RELIABLE_WRITE_KEY] = callback;
+        reject(RELIABLE_WRITE_KEY, "Fail to initiate chunk write for large data");
+        return;
+      }
+      val _buffer = ReliableWriteBuffer(_bytes, _timeout, callback, _writeType, characteristic);
+      _buffer.writeNextChunk();
+    }
 
     fun write(
         serviceUUID: UUID,
@@ -544,6 +683,15 @@ class Device(
             return
         }
         val bytes = stringToBytes(value)
+
+        var _mtu = computeMtu();
+
+        if (bytes.size>_mtu){
+          callbackMap.remove(key);
+          this._start_reliable_write(characteristic, callback, bytes, writeType, timeout);
+          return;
+        }
+        reliableWriteBuffer?.tearDown();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val statusCode = bluetoothGatt?.writeCharacteristic(characteristic, bytes, writeType)

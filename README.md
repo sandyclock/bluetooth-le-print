@@ -785,7 +785,7 @@ Write a value to a characteristic. For an example, see [usage](#usage).
 | **`characteristic`**   | <code>string</code>                                       | UUID of the characteristic (see [UUID format](#uuid-format))                                                                                                                                |
 | **`value`**            | <code><a href="#dataview">DataView</a></code>             | The value to write as a <a href="#dataview">DataView</a>. To create a <a href="#dataview">DataView</a> from an array of numbers, there is a helper function, e.g. numbersToDataView([1, 0]) |
 | **`options`**          | <code><a href="#timeoutoptions">TimeoutOptions</a></code> | Options for plugin call                                                                                                                                                                     |
-| **`usePrinterSocket`** | <code>boolean</code>                                      |                                                                                                                                                                                             |
+| **`usePrinterSocket`** | <code>boolean</code>                                      | use Printer socket to write to the device                                                                                                                                                   |
 
 ---
 
@@ -804,7 +804,7 @@ Write a value to a characteristic without waiting for a response.
 | **`characteristic`**   | <code>string</code>                                       | UUID of the characteristic (see [UUID format](#uuid-format))                                                                                                                                |
 | **`value`**            | <code><a href="#dataview">DataView</a></code>             | The value to write as a <a href="#dataview">DataView</a>. To create a <a href="#dataview">DataView</a> from an array of numbers, there is a helper function, e.g. numbersToDataView([1, 0]) |
 | **`options`**          | <code><a href="#timeoutoptions">TimeoutOptions</a></code> | Options for plugin call                                                                                                                                                                     |
-| **`usePrinterSocket`** | <code>boolean</code>                                      |                                                                                                                                                                                             |
+| **`usePrinterSocket`** | <code>boolean</code>                                      | use Printer socket to write to the device                                                                                                                                                   |
 
 ---
 
