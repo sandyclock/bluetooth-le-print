@@ -150,6 +150,12 @@ class Device(
         private const val REQUEST_MTU = 512
         private const val DEFAULT_MTU = 20
         private const val RELIABLE_WRITE_KEY = "reliable|write"
+        /*
+          wait so that the printer can prepare itself. It is important for HsPrinter. Otherwise,
+          the blue tooth HsPrinter may fail
+         */
+        private const val WAIT_BEFORE_RELIABLE_WRITE: Long = 500
+
     }
 
     private var connectionState = STATE_DISCONNECTED
@@ -650,6 +656,7 @@ class Device(
                                       _timeout: Long
                                       ){
 
+      Thread.sleep(WAIT_BEFORE_RELIABLE_WRITE);
       var status = bluetoothGatt?.beginReliableWrite();
       if (status != true){
         callbackMap[RELIABLE_WRITE_KEY] = callback;
