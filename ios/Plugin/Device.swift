@@ -263,12 +263,20 @@ class Device: NSObject, CBPeripheralDelegate {
             return
         }
         let data: Data = stringToData(value)
+        //wait for 0.5 second before write because of an issue with HsPrinter
+        //@tanli 2/25/2024
+        let seconds = 0.5
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+            // Put your code which should be executed with a delay here
         self.peripheral.writeValue(data, for: characteristic, type: writeType)
         if writeType == CBCharacteristicWriteType.withResponse {
             self.setTimeout(key, "Write timeout.", timeout)
         } else {
             self.resolve(key, "Successfully written value.")
         }
+
+        }
+        
     }
 
     func peripheral(
