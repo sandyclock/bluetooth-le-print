@@ -42,6 +42,13 @@ describe('dataViewToNumbers', () => {
     const result = dataViewToNumbers(value);
     expect(result).toEqual([]);
   });
+
+  it('should respect the offset and length', () => {
+    const array = [0, 5, 200];
+    const value = new DataView(Uint8Array.from([1, 2, ...array, 10, 11]).buffer, 2, 3);
+    const result = dataViewToNumbers(value);
+    expect(result).toEqual(array);
+  });
 });
 
 describe('textToDataView', () => {
@@ -100,6 +107,15 @@ describe('hexStringToDataView', () => {
 
   it('should ignore leading and trailing white space and work with upper case', () => {
     const value = ' 00 05 C8 ';
+    const result = hexStringToDataView(value);
+    expect(result.byteLength).toEqual(3);
+    expect(result.getUint8(0)).toEqual(0);
+    expect(result.getUint8(1)).toEqual(5);
+    expect(result.getUint8(2)).toEqual(200);
+  });
+
+  it('should work without spaces', () => {
+    const value = '0005C8';
     const result = hexStringToDataView(value);
     expect(result.byteLength).toEqual(3);
     expect(result.getUint8(0)).toEqual(0);

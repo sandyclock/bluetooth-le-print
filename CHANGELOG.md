@@ -2,6 +2,75 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0](https://github.com/capacitor-community/bluetooth-le/compare/v6.0.2...v6.1.0) (2024-11-21)
+
+
+### Features
+
+* **android:** Add getBondedDevices method to retrieve bonded devices on Android ([#716](https://github.com/capacitor-community/bluetooth-le/issues/716)) ([91a4d00](https://github.com/capacitor-community/bluetooth-le/commit/91a4d0089d4a3125987cc5d4cb0934bb7c004ffd))
+
+### [6.0.2](https://github.com/capacitor-community/bluetooth-le/compare/v6.0.1...v6.0.2) (2024-11-03)
+
+### Features
+
+* improve byte to hex string conversion optimizations ([#701](https://github.com/capacitor-community/bluetooth-le/issues/701)) ([e064587](https://github.com/capacitor-community/bluetooth-le/commit/e064587a7fd55891ec2b4bf1440b9c8d792cc182))
+
+### [6.0.1](https://github.com/capacitor-community/bluetooth-le/compare/v6.0.0...v6.0.1) (2024-07-22)
+
+
+### Bug Fixes
+
+* **android:** remove unused layout files ([#670](https://github.com/capacitor-community/bluetooth-le/issues/670)) ([72ce7ab](https://github.com/capacitor-community/bluetooth-le/commit/72ce7abd6911d29ab54610ef61398eaf7e5f8fcd))
+
+## [6.0.0](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.4...v6.0.0) (2024-05-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* update plugin to Capacitor 6
+
+### Features
+
+* update plugin to Capacitor 6 ([619d342](https://github.com/capacitor-community/bluetooth-le/commit/619d342f7ef21057e5b950eb21a16d9d91c69a9f))
+
+## [6.0.0-0](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.1...v6.0.0-0) (2024-02-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* update plugin to Capacitor 6
+
+### Features
+
+* update plugin to Capacitor 6 ([0475e85](https://github.com/capacitor-community/bluetooth-le/commit/0475e8520c5f044fe2f693a088235ce2f5a72cde))
+
+
+### Bug Fixes
+
+* fix addListener return types ([fc94069](https://github.com/capacitor-community/bluetooth-le/commit/fc94069ad72ea16a2e74a8382597d61d6e23434e))
+
+### [3.1.4](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.3...v3.1.4) (2024-04-06)
+
+
+### Bug Fixes
+
+* **ios:** make callback map thread-safe to fix high write and notify rates [#630](https://github.com/capacitor-community/bluetooth-le/issues/630) ([#642](https://github.com/capacitor-community/bluetooth-le/issues/642)) ([da9b782](https://github.com/capacitor-community/bluetooth-le/commit/da9b7823c67d892de9f5fc8c54690e7b9323fed1))
+* respect byte offset and length of data view in write call ([#641](https://github.com/capacitor-community/bluetooth-le/issues/641)) ([0f01960](https://github.com/capacitor-community/bluetooth-le/commit/0f01960495c4fa9013bf86fd7a552e9866d928c0))
+
+### [3.1.3](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.2...v3.1.3) (2024-04-06)
+
+
+### Bug Fixes
+
+* **android:** set custom callback handler to address callbacks execution order [#635](https://github.com/capacitor-community/bluetooth-le/issues/635) ([#637](https://github.com/capacitor-community/bluetooth-le/issues/637)) ([c1af071](https://github.com/capacitor-community/bluetooth-le/commit/c1af07176a1ac3c083a8ecc25c300962e251f805))
+
+### [3.1.2](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.1...v3.1.2) (2024-02-18)
+
+
+### Bug Fixes
+
+* **android:** pin kotlin jvmTarget version ([#622](https://github.com/capacitor-community/bluetooth-le/issues/622)) ([8597092](https://github.com/capacitor-community/bluetooth-le/commit/859709211066637f565c88d8cba2bc5ea421c29d))
+
 ### [3.1.1](https://github.com/capacitor-community/bluetooth-le/compare/v3.1.0...v3.1.1) (2023-11-05)
 
 

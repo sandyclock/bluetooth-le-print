@@ -35,6 +35,9 @@ jest.mock('./plugin', () => {
     getConnectedDevices: jest.fn(() => {
       return Promise.resolve({ devices: [] });
     }),
+    getBondeddDevices: jest.fn(() => {
+      return Promise.resolve({ devices: [] });
+    }),
     connect: jest.fn(),
     createBond: jest.fn(),
     isBonded: jest.fn(),
@@ -274,6 +277,19 @@ describe('BleClient', () => {
       service,
       characteristic,
       value: '00 01',
+    });
+  });
+
+  it('should respect offset and length of DataView when writing', async () => {
+    (Capacitor.getPlatform as jest.Mock).mockReturnValue('android');
+    expect(Capacitor.getPlatform()).toBe('android');
+    const dataView = new DataView(Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).buffer, 2, 5);
+    await BleClient.write(mockDevice.deviceId, service, characteristic, dataView);
+    expect(BluetoothLe.write).toHaveBeenCalledWith({
+      deviceId: mockDevice.deviceId,
+      service,
+      characteristic,
+      value: '03 04 05 06 07',
     });
   });
 
