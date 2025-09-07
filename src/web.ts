@@ -109,7 +109,7 @@ export class BluetoothLeWeb extends WebPlugin implements BluetoothLePlugin {
     this.discoveredDevices = new Map<string, boolean>();
     navigator.bluetooth.removeEventListener(
       'advertisementreceived',
-      this.onAdvertisementReceivedCallback as EventListener
+      this.onAdvertisementReceivedCallback as EventListener,
     );
     navigator.bluetooth.addEventListener('advertisementreceived', this.onAdvertisementReceivedCallback);
     this.scan = await navigator.bluetooth.requestLEScan({
@@ -265,14 +265,14 @@ export class BluetoothLeWeb extends WebPlugin implements BluetoothLePlugin {
   }
 
   private async getCharacteristic(
-    options: ReadOptions | WriteOptions
+    options: ReadOptions | WriteOptions,
   ): Promise<BluetoothRemoteGATTCharacteristic | undefined> {
     const service = await this.getDeviceFromMap(options.deviceId).gatt?.getPrimaryService(options?.service);
     return service?.getCharacteristic(options?.characteristic);
   }
 
   private async getDescriptor(
-    options: ReadDescriptorOptions | WriteDescriptorOptions
+    options: ReadDescriptorOptions | WriteDescriptorOptions,
   ): Promise<BluetoothRemoteGATTDescriptor | undefined> {
     const characteristic = await this.getCharacteristic(options);
     return characteristic?.getDescriptor(options?.descriptor);
@@ -374,6 +374,11 @@ export class BluetoothLeWeb extends WebPlugin implements BluetoothLePlugin {
       filters.push({
         name: options.name,
         namePrefix: options.namePrefix,
+      });
+    }
+    for (const manufacturerData of options?.manufacturerData ?? []) {
+      filters.push({
+        manufacturerData: [manufacturerData],
       });
     }
     return filters;
