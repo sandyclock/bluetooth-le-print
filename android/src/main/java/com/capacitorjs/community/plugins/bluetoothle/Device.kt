@@ -228,7 +228,16 @@ class Device(
         override fun onMtuChanged(gatt: BluetoothGatt?, mtu: Int, status: Int) {
             super.onMtuChanged(gatt, mtu, status)
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                currentMtu = mtu
+                currentMtu = mtu;
+                /*
+                 * We need to check if the granted MTU is less than the requested one.
+                 * In one printer, that is, HS-M80, the MTU granted (517 bytes) is given larger than the requested MTU (512)
+                 * @tanli 9/8/2025
+                 */
+                if (currentMtu>REQUEST_MTU){
+                  currentMtu = REQUEST_MTU;
+                 // Logger.debug(TAG, "MTU is adjusted to the MTU requested");
+                }
                 Logger.debug(TAG, "MTU changed: $mtu")
             } else {
                 Logger.debug(TAG, "MTU change failed: $mtu")
